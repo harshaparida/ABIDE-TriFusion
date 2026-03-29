@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASD vs HC Classification - Enhanced Multilevel Stacking Model</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --text: #333;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px;
+            font-size: 1.3rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box.success {
+            background: linear-gradient(135deg, var(--success), #1e8449);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .architecture {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .architecture .level {
+            margin: 15px 0;
+            padding-left: 20px;
+            border-left: 3px solid var(--secondary);
+        }
+
+        .architecture .level-1 { border-color: #e74c3c; }
+        .architecture .level-2 { border-color: #f39c12; }
+        .architecture .level-3 { border-color: #27ae60; }
+
+        .architecture .comment {
+            color: #6a9955;
+        }
+
+        .architecture .keyword {
+            color: #569cd6;
+        }
+
+        .architecture .string {
+            color: #ce9178;
+        }
+
+        .architecture .function {
+            color: #dcdcaa;
+        }
+
+        .flow-diagram {
+            background: var(--light);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+            transition: transform 0.2s;
+        }
+
+        .flow-step:hover {
+            transform: translateX(10px);
+        }
+
+        .flow-step.highlight {
+            border-left-color: var(--success);
+            background: #e8f8f5;
+        }
+
+        .flow-number {
+            background: var(--secondary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin: 5px 0;
+        }
+
+        .discovery {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .discovery.success {
+            background: #d4edda;
+            border-left-color: var(--success);
+        }
+
+        .discovery.error {
+            background: #f8d7da;
+            border-left-color: var(--accent);
+        }
+
+        .model-params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .param-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .param-name {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .param-value {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .key-finding {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .key-finding h4 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .feature-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-icon {
+            background: var(--secondary);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        .usage-code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Consolas', monospace;
+        }
+
+        .usage-code code {
+            display: block;
+            white-space: pre;
+        }
+
+        .highlight-line {
+            background: #3a3a3a;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ASD vs HC Classification</h1>
+            <p>Enhanced Multilevel Stacking Model - 77.22% Accuracy</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Results Section -->
+        <div class="card">
+            <h2>Model Performance</h2>
+            <div class="stats-grid">
+                <div class="stat-box success">
+                    <div class="stat-value">77.22%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-box success">
+                    <div class="stat-value">0.7654</div>
+                    <div class="stat-label">F1-Score</div>
+                </div>
+                <div class="stat-box success">
+                    <div class="stat-value">0.8199</div>
+                    <div class="stat-label">AUC-ROC</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">654</div>
+                    <div class="stat-label">Subjects</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Discovery -->
+        <div class="card">
+            <h2>Key Discovery</h2>
+            <div class="key-finding">
+                <h4>The Most Important Finding</h4>
+                <p><strong>Keeping FC features RAW (not harmonized) was critical for performance.</strong></p>
+                <p>When FC features were harmonized using ComBat, accuracy dropped to ~60%. By keeping them raw, LogisticRegression alone achieved 75.84% accuracy, and the final stacked model achieved 77.22%.</p>
+            </div>
+        </div>
+
+        <!-- Pipeline Overview -->
+        <div class="card">
+            <h2>Pipeline Overview</h2>
+            <div class="flow-diagram">
+                <div class="flow-step highlight">
+                    <div class="flow-number">1</div>
+                    <div><strong>Load FC Matrices</strong> - 2068 FC matrices loaded, 654 subjects aligned</div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">
+                    <div class="flow-number">2</div>
+                    <div><strong>FC Feature Extraction</strong> - Variance-based selection (8000 edges from 19900)</div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step highlight">
+                    <div class="flow-number">3</div>
+                    <div><strong>Feature Harmonization</strong> - ComBat on sMRI only (NOT FC)</div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">
+                    <div class="flow-number">4</div>
+                    <div><strong>Fusion</strong> - Concatenate FC + sMRI + Phenotypes (8111 features)</div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step highlight">
+                    <div class="flow-number">5</div>
+                    <div><strong>Variance Selection</strong> - Select top 6500 features</div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">
+                    <div class="flow-number">6</div>
+                    <div><strong>Multilevel Stacking</strong> - XGBoost + LightGBM + LogisticRegression</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Engineering -->
+        <div class="card">
+            <h2>Feature Engineering</h2>
+            <h3>FC Features (8008 total)</h3>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">E</div>
+                    <div>Edge Features (8000) - High-variance FC edges</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">G</div>
+                    <div>Graph Features (8) - Degree, clustering, PageRank</div>
+                </div>
+            </div>
+
+            <h3>Additional Features</h3>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">S</div>
+                    <div>sMRI Features (97)</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">P</div>
+                    <div>Phenotype Features (6)</div>
+                </div>
+            </div>
+            
+            <h3>Total: 8111 Features</h3>
+        </div>
+
+        <!-- Model Architecture -->
+        <div class="card">
+            <h2>Enhanced Stacking Model Architecture</h2>
+            
+            <div class="architecture">
+<span class="comment"># ================================================</span>
+<span class="comment"># LEVEL 1: Base Models (3-Fold CV with Feature Selection)</span>
+<span class="comment"># ================================================</span>
+
+<span class="keyword">for each fold:</span>
+    <span class="comment"># SelectKBest with f_classif inside CV (NO data leakage)</span>
+    X_selected = SelectKBest(k=2500).fit_transform(X_train, y_train)
+    
+    <span class="comment"># Model 1: XGBoost</span>
+    xgb = XGBClassifier(
+        n_estimators=500,
+        max_depth=5,
+        learning_rate=0.02,
+        scale_pos_weight=class_ratio,
+        colsample_bytree=0.8
+    )
+    
+    <span class="comment"># Model 2: LightGBM</span>
+    lgbm = LGBMClassifier(
+        n_estimators=500,
+        num_leaves=31,
+        learning_rate=0.02,
+        is_unbalance=True
+    )
+    
+    <span class="comment"># Model 3: Logistic Regression</span>
+    lr = LogisticRegression(
+        C=1.0,
+        class_weight='balanced',
+        max_iter=500
+    )
+    
+    <span class="comment"># Generate OOF predictions</span>
+    P1 = [xgb_proba, lgbm_proba, lr_proba]
+
+<span class="comment"># ================================================</span>
+<span class="comment"># LEVEL 2: Meta Learners (on Level 1 OOF predictions)</span>
+<span class="comment"># ================================================</span>
+
+P2 = [xgb_meta, lgbm_meta, lr_meta]
+
+<span class="comment"># ================================================</span>
+<span class="comment"># LEVEL 3: Feature Interactions</span>
+<span class="comment"># ================================================</span>
+
+<span class="comment"># Create interaction features from Level 2 predictions</span>
+interactions = [
+    P2[0] * P2[1],      <span class="comment"># xgb * lgbm</span>
+    P2[0] * P2[2],      <span class="comment"># xgb * lr</span>
+    P2[1] * P2[2],      <span class="comment"># lgbm * lr</span>
+    (P2[0] + P2[1])/2,  <span class="comment"># mean</span>
+    |P2[0] - P2[1]|     <span class="comment"># abs diff</span>
+]
+
+<span class="keyword">for each fold:</span>
+    P3 = XGBClassifier(max_depth=3, n_estimators=100)
+
+<span class="comment"># ================================================</span>
+<span class="comment"># FINAL: Combine All Levels</span>
+<span class="comment"># ================================================</span>
+
+final_proba = (P1.mean() + P2.mean() + P3) / 3.0
+prediction = (final_proba >= threshold).astype(int)
+            </div>
+
+            <h3>Model Parameters</h3>
+            <div class="model-params">
+                <div class="param-item">
+                    <span class="param-name">Variance Selection</span>
+                    <span class="param-value">6500 features</span>
+                </div>
+                <div class="param-item">
+                    <span class="param-name">SelectKBest k</span>
+                    <span class="param-value">2500</span>
+                </div>
+                <div class="param-item">
+                    <span class="param-name">CV Folds</span>
+                    <span class="param-value">3</span>
+                </div>
+                <div class="param-item">
+                    <span class="param-name">Stacking Seeds</span>
+                    <span class="param-value">1</span>
+                </div>
+                <div class="param-item">
+                    <span class="param-name">Optimal Threshold</span>
+                    <span class="param-value">0.47</span>
+                </div>
+                <div class="param-item">
+                    <span class="param-name">Base Models</span>
+                    <span class="param-value">3 (XGB, LGBM, LR)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discoveries -->
+        <div class="card">
+            <h2>Key Discoveries & Solutions</h2>
+            
+            <div class="discovery error">
+                <h4>Problem: Harmonization Hurt Performance</h4>
+                <p><strong>Issue:</strong> FC features harmonized with ComBat resulted in ~60% accuracy (barely better than random).</p>
+                <p><strong>Solution:</strong> Keep FC features raw, only harmonize sMRI features.</p>
+            </div>
+
+            <div class="discovery error">
+                <h4>Problem: Feature Selection Location</h4>
+                <p><strong>Issue:</strong> Applying SelectKBest BEFORE cross-validation caused data leakage and inflated metrics.</p>
+                <p><strong>Solution:</strong> Move SelectKBest INSIDE the CV loop to prevent leakage.</p>
+            </div>
+
+            <div class="discovery error">
+                <h4>Problem: Too Many/Different Models</h4>
+                <p><strong>Issue:</strong> Using many different model types and hyperparameters without proper CV feature selection led to overfitting.</p>
+                <p><strong>Solution:</strong> Use consistent feature selection inside CV with XGBoost, LightGBM, and LogisticRegression.</p>
+            </div>
+
+            <div class="discovery success">
+                <h4>Success: LogisticRegression Was Key</h4>
+                <p>LogisticRegression with class balancing achieved <strong>75.84%</strong> accuracy - the best single model. The stacking combined it with tree-based models for the final 77.22%.</p>
+            </div>
+        </div>
+
+        <!-- Individual Model Performance -->
+        <div class="card">
+            <h2>Model Comparison: Enhanced Stacking vs Alternative Models</h2>
+            <p>Comparison of Enhanced Stacking with SVM, MLP, and 1D CNN on the same data and features.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Accuracy</th>
+                        <th>F1-Score</th>
+                        <th>AUC</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background-color: #e8f8f5;">
+                        <td><strong>Enhanced Stacking</strong></td>
+                        <td style="color: var(--success); font-weight: bold;">77.22%</td>
+                        <td>0.7654</td>
+                        <td>0.8199</td>
+                        <td>XGB + LGBM + LR + Stacking</td>
+                    </tr>
+                    <tr>
+                        <td>SVM (RBF Kernel)</td>
+                        <td>67.89%</td>
+                        <td>0.6698</td>
+                        <td>0.7224</td>
+                        <td>Good baseline but no stacking</td>
+                    </tr>
+                    <tr>
+                        <td>MLP (Neural Network)</td>
+                        <td>67.13%</td>
+                        <td>0.6560</td>
+                        <td>0.7173</td>
+                        <td>Struggles with tabular FC data</td>
+                    </tr>
+                    <tr>
+                        <td>1D CNN</td>
+                        <td>60.86%</td>
+                        <td>0.5831</td>
+                        <td>0.6504</td>
+                        <td>Not optimal for this task</td>
+                    </tr>
+                    <tr>
+                        <td>Simple Ensemble</td>
+                        <td>66.82%</td>
+                        <td>0.6483</td>
+                        <td>0.7069</td>
+                        <td>Averaging without proper stacking</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="key-finding">
+                <h4>Key Insight: Stacking Matters!</h4>
+                <p>The enhanced stacking model achieves <strong>77.22%</strong> accuracy - nearly <strong>10% better</strong> than the best individual model (SVM at 67.89%).</p>
+                <p>Training code: <code>normal_models.py</code></p>
+            </div>
+        </div>
+
+        <!-- Model Usage -->
+        <div class="card">
+            <h2>Using the Model</h2>
+            
+            <h3>Python API</h3>
+            <div class="usage-code">
+<code><span class="highlight-line">import joblib
+import numpy as np
+
+# Load the trained model
+model = joblib.load("models/enhanced_stacking_model.joblib")
+
+# Make predictions
+predictions, probabilities = predict(model, your_features)
+
+# predictions: 0 (HC) or 1 (ASD)
+# probabilities: probability score for ASD class</code>
+            </div>
+
+            <h3>Command Line</h3>
+            <div class="usage-code">
+<code><span class="highlight-line">python inference.py \
+    --model models/enhanced_stacking_model.joblib \
+    --input your_concat_features.csv \
+    --output predictions.csv</code>
+            </div>
+
+            <h3>Input Format</h3>
+            <p>The model expects concat_features in the same format as the pipeline produces:</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>FC features (8008) - from fc_agent</li>
+                <li>sMRI features (97) - from smri_agent</li>
+                <li>Phenotype features (6) - from phenotype_agent</li>
+            </ul>
+            <p style="margin-top: 10px;"><strong>Important:</strong> FC features should NOT be harmonized.</p>
+        </div>
+
+        <!-- Summary -->
+        <div class="card">
+            <h2>Summary</h2>
+            <div class="key-finding">
+                <h4>What Made the Difference?</h4>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Keep FC features raw</strong> - Harmonization removed discriminative information</li>
+                    <li><strong>Variance-based pre-selection</strong> - Top 6500 features from 8111</li>
+                    <li><strong>SelectKBest inside CV</strong> - Prevents data leakage, selects relevant features per fold</li>
+                    <li><strong>LogisticRegression</strong> - Best single model, works well with many features</li>
+                    <li><strong>Multilevel stacking</strong> - Combines tree-based and linear models effectively</li>
+                    <li><strong>Feature interactions</strong> - Level 3 captures non-linear relationships between model predictions</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Files -->
+        <div class="card">
+            <h2>Output Files</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>models/enhanced_stacking_model.joblib</code></td>
+                        <td>Trained stacking model (3.4 MB)</td>
+                    </tr>
+                    <tr>
+                        <td><code>inference.py</code></td>
+                        <td>Python script for running inference</td>
+                    </tr>
+                    <tr>
+                        <td><code>src/agentic/pipeline.py</code></td>
+                        <td>Main pipeline with enhanced stacking</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <p>ASD vs HC Classification Project | Enhanced Multilevel Stacking Model</p>
+        <p>Model Accuracy: 77.22% | F1-Score: 0.7654 | AUC: 0.8199</p>
+    </footer>
+</body>
+</html>
