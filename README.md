@@ -47,8 +47,8 @@ The command will:
 4. Save a trimmed JSON report (`results.json`) and a plain‑text summary (`summary.txt`) under the folder defined in the config (`output_dir`).  
 
 ---  
-### Model Architecture
-# Autism Spectrum Disorder Detection
+# Model Architecture
+## Autism Spectrum Disorder Detection
 
 ## 1. Dataset Summary
 
