@@ -52,7 +52,7 @@ The command will:
 
 ## 1. Dataset Summary
 
-![Dataset Summary](Screenshot%2026-06-02%110717.png)
+![Dataset Summary](Screenshot 2026-06-02 110717.png)
 
 ## 2. Prediction Architecture
 
