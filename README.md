@@ -47,6 +47,28 @@ The command will:
 4. Save a trimmed JSON report (`results.json`) and a plain‑text summary (`summary.txt`) under the folder defined in the config (`output_dir`).  
 
 ---  
+### Model Architecture
+# Autism Spectrum Disorder Detection
+
+## 1. Dataset Summary
+
+![Dataset Summary](Screenshot2026-06-02 110717.png)
+
+## 2. Prediction Architecture
+
+![Prediction Architecture](Screenshot2026-06-02 110805.png)
+
+---
+
+## 3. Feature Engineering Pipeline
+
+![Feature Engineering](Screenshot2026-06-02 110827.png)
+
+---
+
+## 4. Multi Stacking Model Architecture
+
+![Multi Stacking Model Architecture](Screenshot2026-06-02 111001.png)
 
 ## 📂 Folder Structure  
 
