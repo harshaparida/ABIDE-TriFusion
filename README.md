@@ -52,23 +52,23 @@ The command will:
 
 ## 1. Dataset Summary
 
-![Dataset Summary](Screenshot 2026-06-02 110717.png)
+![Dataset Summary](data_summary.png)
 
 ## 2. Prediction Architecture
 
-![Prediction Architecture](Screenshot%2026-06-02%110805.png)
+![Prediction Architecture](Preprocessing.png)
 
 ---
 
 ## 3. Feature Engineering Pipeline
 
-![Feature Engineering](Screenshot%2026-06-02%110827.png)
+![Feature Engineering](Feature_engineering.png)
 
 ---
 
 ## 4. Multi Stacking Model Architecture
 
-![Multi Stacking Model Architecture](Screenshot%2026-06-02%111001.png)
+![Multi Stacking Model Architecture](Multistacking.png)
 
 ## 📂 Folder Structure  
 
